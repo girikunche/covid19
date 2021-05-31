@@ -1,0 +1,52 @@
+---
+title: "Final Project 2 -  Reproducible Report on COVID19 Data"
+author: "Giri Kunche"
+date: "5/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(knitr)
+```
+
+## Cleaning and Processing
+
+```{r get_jhu_data}
+url_in<-"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+file_names<-c("time_series_covid19_confirmed_global.csv",
+              "time_series_covid19_deaths_global.csv",
+              "time_series_covid19_confirmed_US.csv",
+              "time_series_covid19_deaths_US.csv")
+urls<-str_c(url_in,file_names)
+```
+
+```{r import_data,message=FALSE}
+global_cases<-read_csv(urls[1])
+global_deaths<-read_csv(urls[2])
+US_cases<-read_csv(urls[3])
+US_deaths<-read_csv(urls[4])
+```
+
+
+```{r tidy_global_data}
+global_cases<-global_cases %>% 
+  pivot_longer(cols = -c('Province/State','Country/Region',Lat,Long),names_to="date",values_to="cases") %>% select(-c(Lat,Long))
+global_deaths<-global_deaths %>% 
+  pivot_longer(cols = -c('Province/State','Country/Region',Lat,Long),names_to="date",values_to="deaths") %>% select(-c(Lat,Long))
+global <- global_cases %>% full_join(global_deaths) %>% rename(Country_Region ='Country/Region',Province_State ='Province/State') %>%
+  mutate(date= mdy(date))
+
+summary(global)
+#Filter only cases which are positive
+global <-global %>% filter(cases >0)
+summary(global)
+```
+
+```{r tidy_us_data}
+US_cases<-US_cases %>%pivot_longer(cols=-(UID:Combined_Key),names_to="date",values_to="cases") %>% select(Admin2:cases)%>% mutate(date=mdy(date))%>%select(-c(Lat,Long_))
+US_deaths<-US_deaths %>%pivot_longer(cols=-(UID:Population),names_to="date",values_to="deaths") %>% select(Admin2:deaths)%>% mutate(date=mdy(date))%>%select(-c(Lat,Long_))
+US <- US_cases %>% full_join(US_deaths)
+```
