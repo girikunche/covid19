@@ -192,40 +192,38 @@ global &lt;- global_cases %&gt;% full_join(global_deaths) %&gt;% rename(Country_
 <pre><code>## Joining, by = c(&quot;Province/State&quot;, &quot;Country/Region&quot;, &quot;date&quot;)</code></pre>
 <pre class="r"><code>summary(global)</code></pre>
 <pre><code>##  Province_State     Country_Region          date                cases         
-##  Length:134200      Length:134200      Min.   :2020-01-22   Min.   :       0  
-##  Class :character   Class :character   1st Qu.:2020-05-22   1st Qu.:      89  
-##  Mode  :character   Mode  :character   Median :2020-09-21   Median :    1334  
-##                                        Mean   :2020-09-21   Mean   :  188080  
-##                                        3rd Qu.:2021-01-21   3rd Qu.:   28145  
-##                                        Max.   :2021-05-23   Max.   :33117737  
-##      deaths        
-##  Min.   :     0.0  
-##  1st Qu.:     1.0  
-##  Median :    21.0  
-##  Mean   :  4493.8  
-##  3rd Qu.:   489.2  
-##  Max.   :589893.0</code></pre>
+##  Length:136344      Length:136344      Min.   :2020-01-22   Min.   :       0  
+##  Class :character   Class :character   1st Qu.:2020-05-24   1st Qu.:      87  
+##  Mode  :character   Mode  :character   Median :2020-09-24   Median :    1353  
+##                                        Mean   :2020-09-24   Mean   :  192535  
+##                                        3rd Qu.:2021-01-26   3rd Qu.:   28980  
+##                                        Max.   :2021-05-29   Max.   :33251939  
+##      deaths      
+##  Min.   :     0  
+##  1st Qu.:     1  
+##  Median :    21  
+##  Mean   :  4577  
+##  3rd Qu.:   506  
+##  Max.   :594306</code></pre>
 <pre class="r"><code>#Filter only cases which are positive
 global &lt;-global %&gt;% filter(cases &gt;0)
 summary(global)</code></pre>
 <pre><code>##  Province_State     Country_Region          date                cases         
-##  Length:120410      Length:120410      Min.   :2020-01-22   Min.   :       1  
-##  Class :character   Class :character   1st Qu.:2020-06-22   1st Qu.:     252  
-##  Mode  :character   Mode  :character   Median :2020-10-14   Median :    2396  
-##                                        Mean   :2020-10-11   Mean   :  209620  
-##                                        3rd Qu.:2021-02-02   3rd Qu.:   41180  
-##                                        Max.   :2021-05-23   Max.   :33117737  
+##  Length:122060      Length:122060      Min.   :2020-01-22   Min.   :       1  
+##  Class :character   Class :character   1st Qu.:2020-06-24   1st Qu.:     255  
+##  Mode  :character   Mode  :character   Median :2020-10-17   Median :    2447  
+##                                        Mean   :2020-10-15   Mean   :  215066  
+##                                        3rd Qu.:2021-02-07   3rd Qu.:   42676  
+##                                        Max.   :2021-05-29   Max.   :33251939  
 ##      deaths      
 ##  Min.   :     0  
 ##  1st Qu.:     2  
-##  Median :    43  
-##  Mean   :  5008  
-##  3rd Qu.:   705  
-##  Max.   :589893</code></pre>
+##  Median :    44  
+##  Mean   :  5113  
+##  3rd Qu.:   726  
+##  Max.   :594306</code></pre>
 <pre class="r"><code>US_cases&lt;-US_cases %&gt;%pivot_longer(cols=-(UID:Combined_Key),names_to=&quot;date&quot;,values_to=&quot;cases&quot;) %&gt;% select(Admin2:cases)%&gt;% mutate(date=mdy(date))%&gt;%select(-c(Lat,Long_))
-
 US_deaths&lt;-US_deaths %&gt;%pivot_longer(cols=-(UID:Population),names_to=&quot;date&quot;,values_to=&quot;deaths&quot;) %&gt;% select(Admin2:deaths)%&gt;% mutate(date=mdy(date))%&gt;%select(-c(Lat,Long_))
-
 US &lt;- US_cases %&gt;% full_join(US_deaths)</code></pre>
 <pre><code>## Joining, by = c(&quot;Admin2&quot;, &quot;Province_State&quot;, &quot;Country_Region&quot;, &quot;Combined_Key&quot;, &quot;date&quot;)</code></pre>
 </div>
