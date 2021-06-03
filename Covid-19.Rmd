@@ -2,17 +2,29 @@
 title: "Final Project 2 -  Reproducible Report on COVID19 Data"
 author: "Giri Kunche"
 date: "5/20/2021"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
 ---
+## Project Description
+COVID-19 or the Coronavirus is a disease caused by SARS-CoV-2 virus. The first known case was identified in Wuhan,China in Dec 2019. This disease is spread all over the world and is currently prevalent in almost
+all countries. 
+
+As part of reproducible report, we will download and analyse COVID-19 data set published by Center for Systems Science and Engineering at John Hopkins University. The data is available at github site : https://github.com/CSSEGISandData/COVID-19
+
+## Load Libraries
+Load tidyverse and lubridate libraries.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidyr)
 library(lubridate)
 library(knitr)
 ```
 
-## Cleaning and Processing
+## Download Data 
+We will download four daily time series data for the Global confirmed cases, US confirmed cases, Global deaths and US deaths. Both Global  and US data set has Province/State, Country, Latitude, Longitude and cases or deaths by date.  
 
 ```{r get_jhu_data}
 url_in<-"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
@@ -30,6 +42,20 @@ US_cases<-read_csv(urls[3])
 US_deaths<-read_csv(urls[4])
 ```
 
+## Review Raw Data
+
+```{r raw_data,message=FALSE}
+head(global_cases)
+head(global_deaths)
+head(US_cases)
+head(US_deaths)
+```
+
+Raw data in all four data sets have each data as column. Also there are some  nulls values in Province/State column in global_cases and global_deaths data set.  US Data set has additional columns e.g UID, iso2, iso3,code3 etc. 
+
+## Cleaning and Processing
+
+### Global Cases and Deaths Data Set
 
 ```{r tidy_global_data}
 global_cases<-global_cases %>% 
@@ -44,6 +70,8 @@ summary(global)
 global <-global %>% filter(cases >0)
 summary(global)
 ```
+
+### US Cases and Deaths Data Set
 
 ```{r tidy_us_data}
 US_cases<-US_cases %>%pivot_longer(cols=-(UID:Combined_Key),names_to="date",values_to="cases") %>% select(Admin2:cases)%>% mutate(date=mdy(date))%>%select(-c(Lat,Long_))

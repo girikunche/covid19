@@ -170,9 +170,31 @@ pre code {
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#project-description">Project Description</a></li>
+<li><a href="#load-libraries">Load Libraries</a></li>
+<li><a href="#download-data">Download Data</a></li>
+<li><a href="#review-raw-data">Review Raw Data</a></li>
+<li><a href="#cleaning-and-processing">Cleaning and Processing</a>
+<ul>
+<li><a href="#global-cases-and-deaths-data-set">Global Cases and Deaths Data Set</a></li>
+</ul></li>
+</ul>
+</div>
 
-<div id="cleaning-and-processing" class="section level2">
-<h2>Cleaning and Processing</h2>
+<div id="project-description" class="section level2">
+<h2>Project Description</h2>
+<p>COVID-19 or the Coronavirus is a disease caused by SARS-CoV-2 virus. The first known case was identified in Wuhan,China in Dec 2019. This disease is spread all over the world and is currently prevalent in almost all countries.</p>
+<p>As part of reproducible report, we will download and analyse COVID-19 data set published by Center for Systems Science and Engineering at John Hopkins University. The data is available at github site : <a href="https://github.com/CSSEGISandData/COVID-19" class="uri">https://github.com/CSSEGISandData/COVID-19</a></p>
+</div>
+<div id="load-libraries" class="section level2">
+<h2>Load Libraries</h2>
+<p>Load tidyverse and lubridate libraries.</p>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download Data</h2>
+<p>We will download four daily time series data for the Global confirmed cases, US confirmed cases, Global deaths and US deaths. Both Global and US data set has Province/State, Country, Latitude, Longitude and cases or deaths by date.</p>
 <pre class="r"><code>url_in&lt;-&quot;https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/&quot;
 file_names&lt;-c(&quot;time_series_covid19_confirmed_global.csv&quot;,
               &quot;time_series_covid19_deaths_global.csv&quot;,
@@ -183,6 +205,139 @@ urls&lt;-str_c(url_in,file_names)</code></pre>
 global_deaths&lt;-read_csv(urls[2])
 US_cases&lt;-read_csv(urls[3])
 US_deaths&lt;-read_csv(urls[4])</code></pre>
+</div>
+<div id="review-raw-data" class="section level2">
+<h2>Review Raw Data</h2>
+<pre class="r"><code>head(global_cases)</code></pre>
+<pre><code>## # A tibble: 6 x 499
+##   `Province/State` `Country/Region`     Lat   Long `1/22/20` `1/23/20` `1/24/20`
+##   &lt;chr&gt;            &lt;chr&gt;              &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 &lt;NA&gt;             Afghanistan         33.9  67.7          0         0         0
+## 2 &lt;NA&gt;             Albania             41.2  20.2          0         0         0
+## 3 &lt;NA&gt;             Algeria             28.0   1.66         0         0         0
+## 4 &lt;NA&gt;             Andorra             42.5   1.52         0         0         0
+## 5 &lt;NA&gt;             Angola             -11.2  17.9          0         0         0
+## 6 &lt;NA&gt;             Antigua and Barbu~  17.1 -61.8          0         0         0
+## # ... with 492 more variables: 1/25/20 &lt;dbl&gt;, 1/26/20 &lt;dbl&gt;, 1/27/20 &lt;dbl&gt;,
+## #   1/28/20 &lt;dbl&gt;, 1/29/20 &lt;dbl&gt;, 1/30/20 &lt;dbl&gt;, 1/31/20 &lt;dbl&gt;, 2/1/20 &lt;dbl&gt;,
+## #   2/2/20 &lt;dbl&gt;, 2/3/20 &lt;dbl&gt;, 2/4/20 &lt;dbl&gt;, 2/5/20 &lt;dbl&gt;, 2/6/20 &lt;dbl&gt;,
+## #   2/7/20 &lt;dbl&gt;, 2/8/20 &lt;dbl&gt;, 2/9/20 &lt;dbl&gt;, 2/10/20 &lt;dbl&gt;, 2/11/20 &lt;dbl&gt;,
+## #   2/12/20 &lt;dbl&gt;, 2/13/20 &lt;dbl&gt;, 2/14/20 &lt;dbl&gt;, 2/15/20 &lt;dbl&gt;, 2/16/20 &lt;dbl&gt;,
+## #   2/17/20 &lt;dbl&gt;, 2/18/20 &lt;dbl&gt;, 2/19/20 &lt;dbl&gt;, 2/20/20 &lt;dbl&gt;, 2/21/20 &lt;dbl&gt;,
+## #   2/22/20 &lt;dbl&gt;, 2/23/20 &lt;dbl&gt;, 2/24/20 &lt;dbl&gt;, 2/25/20 &lt;dbl&gt;, 2/26/20 &lt;dbl&gt;,
+## #   2/27/20 &lt;dbl&gt;, 2/28/20 &lt;dbl&gt;, 2/29/20 &lt;dbl&gt;, 3/1/20 &lt;dbl&gt;, 3/2/20 &lt;dbl&gt;,
+## #   3/3/20 &lt;dbl&gt;, 3/4/20 &lt;dbl&gt;, 3/5/20 &lt;dbl&gt;, 3/6/20 &lt;dbl&gt;, 3/7/20 &lt;dbl&gt;,
+## #   3/8/20 &lt;dbl&gt;, 3/9/20 &lt;dbl&gt;, 3/10/20 &lt;dbl&gt;, 3/11/20 &lt;dbl&gt;, 3/12/20 &lt;dbl&gt;,
+## #   3/13/20 &lt;dbl&gt;, 3/14/20 &lt;dbl&gt;, 3/15/20 &lt;dbl&gt;, 3/16/20 &lt;dbl&gt;, 3/17/20 &lt;dbl&gt;,
+## #   3/18/20 &lt;dbl&gt;, 3/19/20 &lt;dbl&gt;, 3/20/20 &lt;dbl&gt;, 3/21/20 &lt;dbl&gt;, 3/22/20 &lt;dbl&gt;,
+## #   3/23/20 &lt;dbl&gt;, 3/24/20 &lt;dbl&gt;, 3/25/20 &lt;dbl&gt;, 3/26/20 &lt;dbl&gt;, 3/27/20 &lt;dbl&gt;,
+## #   3/28/20 &lt;dbl&gt;, 3/29/20 &lt;dbl&gt;, 3/30/20 &lt;dbl&gt;, 3/31/20 &lt;dbl&gt;, 4/1/20 &lt;dbl&gt;,
+## #   4/2/20 &lt;dbl&gt;, 4/3/20 &lt;dbl&gt;, 4/4/20 &lt;dbl&gt;, 4/5/20 &lt;dbl&gt;, 4/6/20 &lt;dbl&gt;,
+## #   4/7/20 &lt;dbl&gt;, 4/8/20 &lt;dbl&gt;, 4/9/20 &lt;dbl&gt;, 4/10/20 &lt;dbl&gt;, 4/11/20 &lt;dbl&gt;,
+## #   4/12/20 &lt;dbl&gt;, 4/13/20 &lt;dbl&gt;, 4/14/20 &lt;dbl&gt;, 4/15/20 &lt;dbl&gt;, 4/16/20 &lt;dbl&gt;,
+## #   4/17/20 &lt;dbl&gt;, 4/18/20 &lt;dbl&gt;, 4/19/20 &lt;dbl&gt;, 4/20/20 &lt;dbl&gt;, 4/21/20 &lt;dbl&gt;,
+## #   4/22/20 &lt;dbl&gt;, 4/23/20 &lt;dbl&gt;, 4/24/20 &lt;dbl&gt;, 4/25/20 &lt;dbl&gt;, 4/26/20 &lt;dbl&gt;,
+## #   4/27/20 &lt;dbl&gt;, 4/28/20 &lt;dbl&gt;, 4/29/20 &lt;dbl&gt;, 4/30/20 &lt;dbl&gt;, 5/1/20 &lt;dbl&gt;,
+## #   5/2/20 &lt;dbl&gt;, 5/3/20 &lt;dbl&gt;, ...</code></pre>
+<pre class="r"><code>head(global_deaths)</code></pre>
+<pre><code>## # A tibble: 6 x 499
+##   `Province/State` `Country/Region`     Lat   Long `1/22/20` `1/23/20` `1/24/20`
+##   &lt;chr&gt;            &lt;chr&gt;              &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 &lt;NA&gt;             Afghanistan         33.9  67.7          0         0         0
+## 2 &lt;NA&gt;             Albania             41.2  20.2          0         0         0
+## 3 &lt;NA&gt;             Algeria             28.0   1.66         0         0         0
+## 4 &lt;NA&gt;             Andorra             42.5   1.52         0         0         0
+## 5 &lt;NA&gt;             Angola             -11.2  17.9          0         0         0
+## 6 &lt;NA&gt;             Antigua and Barbu~  17.1 -61.8          0         0         0
+## # ... with 492 more variables: 1/25/20 &lt;dbl&gt;, 1/26/20 &lt;dbl&gt;, 1/27/20 &lt;dbl&gt;,
+## #   1/28/20 &lt;dbl&gt;, 1/29/20 &lt;dbl&gt;, 1/30/20 &lt;dbl&gt;, 1/31/20 &lt;dbl&gt;, 2/1/20 &lt;dbl&gt;,
+## #   2/2/20 &lt;dbl&gt;, 2/3/20 &lt;dbl&gt;, 2/4/20 &lt;dbl&gt;, 2/5/20 &lt;dbl&gt;, 2/6/20 &lt;dbl&gt;,
+## #   2/7/20 &lt;dbl&gt;, 2/8/20 &lt;dbl&gt;, 2/9/20 &lt;dbl&gt;, 2/10/20 &lt;dbl&gt;, 2/11/20 &lt;dbl&gt;,
+## #   2/12/20 &lt;dbl&gt;, 2/13/20 &lt;dbl&gt;, 2/14/20 &lt;dbl&gt;, 2/15/20 &lt;dbl&gt;, 2/16/20 &lt;dbl&gt;,
+## #   2/17/20 &lt;dbl&gt;, 2/18/20 &lt;dbl&gt;, 2/19/20 &lt;dbl&gt;, 2/20/20 &lt;dbl&gt;, 2/21/20 &lt;dbl&gt;,
+## #   2/22/20 &lt;dbl&gt;, 2/23/20 &lt;dbl&gt;, 2/24/20 &lt;dbl&gt;, 2/25/20 &lt;dbl&gt;, 2/26/20 &lt;dbl&gt;,
+## #   2/27/20 &lt;dbl&gt;, 2/28/20 &lt;dbl&gt;, 2/29/20 &lt;dbl&gt;, 3/1/20 &lt;dbl&gt;, 3/2/20 &lt;dbl&gt;,
+## #   3/3/20 &lt;dbl&gt;, 3/4/20 &lt;dbl&gt;, 3/5/20 &lt;dbl&gt;, 3/6/20 &lt;dbl&gt;, 3/7/20 &lt;dbl&gt;,
+## #   3/8/20 &lt;dbl&gt;, 3/9/20 &lt;dbl&gt;, 3/10/20 &lt;dbl&gt;, 3/11/20 &lt;dbl&gt;, 3/12/20 &lt;dbl&gt;,
+## #   3/13/20 &lt;dbl&gt;, 3/14/20 &lt;dbl&gt;, 3/15/20 &lt;dbl&gt;, 3/16/20 &lt;dbl&gt;, 3/17/20 &lt;dbl&gt;,
+## #   3/18/20 &lt;dbl&gt;, 3/19/20 &lt;dbl&gt;, 3/20/20 &lt;dbl&gt;, 3/21/20 &lt;dbl&gt;, 3/22/20 &lt;dbl&gt;,
+## #   3/23/20 &lt;dbl&gt;, 3/24/20 &lt;dbl&gt;, 3/25/20 &lt;dbl&gt;, 3/26/20 &lt;dbl&gt;, 3/27/20 &lt;dbl&gt;,
+## #   3/28/20 &lt;dbl&gt;, 3/29/20 &lt;dbl&gt;, 3/30/20 &lt;dbl&gt;, 3/31/20 &lt;dbl&gt;, 4/1/20 &lt;dbl&gt;,
+## #   4/2/20 &lt;dbl&gt;, 4/3/20 &lt;dbl&gt;, 4/4/20 &lt;dbl&gt;, 4/5/20 &lt;dbl&gt;, 4/6/20 &lt;dbl&gt;,
+## #   4/7/20 &lt;dbl&gt;, 4/8/20 &lt;dbl&gt;, 4/9/20 &lt;dbl&gt;, 4/10/20 &lt;dbl&gt;, 4/11/20 &lt;dbl&gt;,
+## #   4/12/20 &lt;dbl&gt;, 4/13/20 &lt;dbl&gt;, 4/14/20 &lt;dbl&gt;, 4/15/20 &lt;dbl&gt;, 4/16/20 &lt;dbl&gt;,
+## #   4/17/20 &lt;dbl&gt;, 4/18/20 &lt;dbl&gt;, 4/19/20 &lt;dbl&gt;, 4/20/20 &lt;dbl&gt;, 4/21/20 &lt;dbl&gt;,
+## #   4/22/20 &lt;dbl&gt;, 4/23/20 &lt;dbl&gt;, 4/24/20 &lt;dbl&gt;, 4/25/20 &lt;dbl&gt;, 4/26/20 &lt;dbl&gt;,
+## #   4/27/20 &lt;dbl&gt;, 4/28/20 &lt;dbl&gt;, 4/29/20 &lt;dbl&gt;, 4/30/20 &lt;dbl&gt;, 5/1/20 &lt;dbl&gt;,
+## #   5/2/20 &lt;dbl&gt;, 5/3/20 &lt;dbl&gt;, ...</code></pre>
+<pre class="r"><code>head(US_cases)</code></pre>
+<pre><code>## # A tibble: 6 x 506
+##        UID iso2  iso3  code3  FIPS Admin2  Province_State Country_Region   Lat
+##      &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;          &lt;dbl&gt;
+## 1 84001001 US    USA     840  1001 Autauga Alabama        US              32.5
+## 2 84001003 US    USA     840  1003 Baldwin Alabama        US              30.7
+## 3 84001005 US    USA     840  1005 Barbour Alabama        US              31.9
+## 4 84001007 US    USA     840  1007 Bibb    Alabama        US              33.0
+## 5 84001009 US    USA     840  1009 Blount  Alabama        US              34.0
+## 6 84001011 US    USA     840  1011 Bullock Alabama        US              32.1
+## # ... with 497 more variables: Long_ &lt;dbl&gt;, Combined_Key &lt;chr&gt;, 1/22/20 &lt;dbl&gt;,
+## #   1/23/20 &lt;dbl&gt;, 1/24/20 &lt;dbl&gt;, 1/25/20 &lt;dbl&gt;, 1/26/20 &lt;dbl&gt;, 1/27/20 &lt;dbl&gt;,
+## #   1/28/20 &lt;dbl&gt;, 1/29/20 &lt;dbl&gt;, 1/30/20 &lt;dbl&gt;, 1/31/20 &lt;dbl&gt;, 2/1/20 &lt;dbl&gt;,
+## #   2/2/20 &lt;dbl&gt;, 2/3/20 &lt;dbl&gt;, 2/4/20 &lt;dbl&gt;, 2/5/20 &lt;dbl&gt;, 2/6/20 &lt;dbl&gt;,
+## #   2/7/20 &lt;dbl&gt;, 2/8/20 &lt;dbl&gt;, 2/9/20 &lt;dbl&gt;, 2/10/20 &lt;dbl&gt;, 2/11/20 &lt;dbl&gt;,
+## #   2/12/20 &lt;dbl&gt;, 2/13/20 &lt;dbl&gt;, 2/14/20 &lt;dbl&gt;, 2/15/20 &lt;dbl&gt;, 2/16/20 &lt;dbl&gt;,
+## #   2/17/20 &lt;dbl&gt;, 2/18/20 &lt;dbl&gt;, 2/19/20 &lt;dbl&gt;, 2/20/20 &lt;dbl&gt;, 2/21/20 &lt;dbl&gt;,
+## #   2/22/20 &lt;dbl&gt;, 2/23/20 &lt;dbl&gt;, 2/24/20 &lt;dbl&gt;, 2/25/20 &lt;dbl&gt;, 2/26/20 &lt;dbl&gt;,
+## #   2/27/20 &lt;dbl&gt;, 2/28/20 &lt;dbl&gt;, 2/29/20 &lt;dbl&gt;, 3/1/20 &lt;dbl&gt;, 3/2/20 &lt;dbl&gt;,
+## #   3/3/20 &lt;dbl&gt;, 3/4/20 &lt;dbl&gt;, 3/5/20 &lt;dbl&gt;, 3/6/20 &lt;dbl&gt;, 3/7/20 &lt;dbl&gt;,
+## #   3/8/20 &lt;dbl&gt;, 3/9/20 &lt;dbl&gt;, 3/10/20 &lt;dbl&gt;, 3/11/20 &lt;dbl&gt;, 3/12/20 &lt;dbl&gt;,
+## #   3/13/20 &lt;dbl&gt;, 3/14/20 &lt;dbl&gt;, 3/15/20 &lt;dbl&gt;, 3/16/20 &lt;dbl&gt;, 3/17/20 &lt;dbl&gt;,
+## #   3/18/20 &lt;dbl&gt;, 3/19/20 &lt;dbl&gt;, 3/20/20 &lt;dbl&gt;, 3/21/20 &lt;dbl&gt;, 3/22/20 &lt;dbl&gt;,
+## #   3/23/20 &lt;dbl&gt;, 3/24/20 &lt;dbl&gt;, 3/25/20 &lt;dbl&gt;, 3/26/20 &lt;dbl&gt;, 3/27/20 &lt;dbl&gt;,
+## #   3/28/20 &lt;dbl&gt;, 3/29/20 &lt;dbl&gt;, 3/30/20 &lt;dbl&gt;, 3/31/20 &lt;dbl&gt;, 4/1/20 &lt;dbl&gt;,
+## #   4/2/20 &lt;dbl&gt;, 4/3/20 &lt;dbl&gt;, 4/4/20 &lt;dbl&gt;, 4/5/20 &lt;dbl&gt;, 4/6/20 &lt;dbl&gt;,
+## #   4/7/20 &lt;dbl&gt;, 4/8/20 &lt;dbl&gt;, 4/9/20 &lt;dbl&gt;, 4/10/20 &lt;dbl&gt;, 4/11/20 &lt;dbl&gt;,
+## #   4/12/20 &lt;dbl&gt;, 4/13/20 &lt;dbl&gt;, 4/14/20 &lt;dbl&gt;, 4/15/20 &lt;dbl&gt;, 4/16/20 &lt;dbl&gt;,
+## #   4/17/20 &lt;dbl&gt;, 4/18/20 &lt;dbl&gt;, 4/19/20 &lt;dbl&gt;, 4/20/20 &lt;dbl&gt;, 4/21/20 &lt;dbl&gt;,
+## #   4/22/20 &lt;dbl&gt;, 4/23/20 &lt;dbl&gt;, 4/24/20 &lt;dbl&gt;, 4/25/20 &lt;dbl&gt;, 4/26/20 &lt;dbl&gt;,
+## #   4/27/20 &lt;dbl&gt;, 4/28/20 &lt;dbl&gt;, ...</code></pre>
+<pre class="r"><code>head(US_deaths)</code></pre>
+<pre><code>## # A tibble: 6 x 507
+##        UID iso2  iso3  code3  FIPS Admin2  Province_State Country_Region   Lat
+##      &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;          &lt;dbl&gt;
+## 1 84001001 US    USA     840  1001 Autauga Alabama        US              32.5
+## 2 84001003 US    USA     840  1003 Baldwin Alabama        US              30.7
+## 3 84001005 US    USA     840  1005 Barbour Alabama        US              31.9
+## 4 84001007 US    USA     840  1007 Bibb    Alabama        US              33.0
+## 5 84001009 US    USA     840  1009 Blount  Alabama        US              34.0
+## 6 84001011 US    USA     840  1011 Bullock Alabama        US              32.1
+## # ... with 498 more variables: Long_ &lt;dbl&gt;, Combined_Key &lt;chr&gt;,
+## #   Population &lt;dbl&gt;, 1/22/20 &lt;dbl&gt;, 1/23/20 &lt;dbl&gt;, 1/24/20 &lt;dbl&gt;,
+## #   1/25/20 &lt;dbl&gt;, 1/26/20 &lt;dbl&gt;, 1/27/20 &lt;dbl&gt;, 1/28/20 &lt;dbl&gt;, 1/29/20 &lt;dbl&gt;,
+## #   1/30/20 &lt;dbl&gt;, 1/31/20 &lt;dbl&gt;, 2/1/20 &lt;dbl&gt;, 2/2/20 &lt;dbl&gt;, 2/3/20 &lt;dbl&gt;,
+## #   2/4/20 &lt;dbl&gt;, 2/5/20 &lt;dbl&gt;, 2/6/20 &lt;dbl&gt;, 2/7/20 &lt;dbl&gt;, 2/8/20 &lt;dbl&gt;,
+## #   2/9/20 &lt;dbl&gt;, 2/10/20 &lt;dbl&gt;, 2/11/20 &lt;dbl&gt;, 2/12/20 &lt;dbl&gt;, 2/13/20 &lt;dbl&gt;,
+## #   2/14/20 &lt;dbl&gt;, 2/15/20 &lt;dbl&gt;, 2/16/20 &lt;dbl&gt;, 2/17/20 &lt;dbl&gt;, 2/18/20 &lt;dbl&gt;,
+## #   2/19/20 &lt;dbl&gt;, 2/20/20 &lt;dbl&gt;, 2/21/20 &lt;dbl&gt;, 2/22/20 &lt;dbl&gt;, 2/23/20 &lt;dbl&gt;,
+## #   2/24/20 &lt;dbl&gt;, 2/25/20 &lt;dbl&gt;, 2/26/20 &lt;dbl&gt;, 2/27/20 &lt;dbl&gt;, 2/28/20 &lt;dbl&gt;,
+## #   2/29/20 &lt;dbl&gt;, 3/1/20 &lt;dbl&gt;, 3/2/20 &lt;dbl&gt;, 3/3/20 &lt;dbl&gt;, 3/4/20 &lt;dbl&gt;,
+## #   3/5/20 &lt;dbl&gt;, 3/6/20 &lt;dbl&gt;, 3/7/20 &lt;dbl&gt;, 3/8/20 &lt;dbl&gt;, 3/9/20 &lt;dbl&gt;,
+## #   3/10/20 &lt;dbl&gt;, 3/11/20 &lt;dbl&gt;, 3/12/20 &lt;dbl&gt;, 3/13/20 &lt;dbl&gt;, 3/14/20 &lt;dbl&gt;,
+## #   3/15/20 &lt;dbl&gt;, 3/16/20 &lt;dbl&gt;, 3/17/20 &lt;dbl&gt;, 3/18/20 &lt;dbl&gt;, 3/19/20 &lt;dbl&gt;,
+## #   3/20/20 &lt;dbl&gt;, 3/21/20 &lt;dbl&gt;, 3/22/20 &lt;dbl&gt;, 3/23/20 &lt;dbl&gt;, 3/24/20 &lt;dbl&gt;,
+## #   3/25/20 &lt;dbl&gt;, 3/26/20 &lt;dbl&gt;, 3/27/20 &lt;dbl&gt;, 3/28/20 &lt;dbl&gt;, 3/29/20 &lt;dbl&gt;,
+## #   3/30/20 &lt;dbl&gt;, 3/31/20 &lt;dbl&gt;, 4/1/20 &lt;dbl&gt;, 4/2/20 &lt;dbl&gt;, 4/3/20 &lt;dbl&gt;,
+## #   4/4/20 &lt;dbl&gt;, 4/5/20 &lt;dbl&gt;, 4/6/20 &lt;dbl&gt;, 4/7/20 &lt;dbl&gt;, 4/8/20 &lt;dbl&gt;,
+## #   4/9/20 &lt;dbl&gt;, 4/10/20 &lt;dbl&gt;, 4/11/20 &lt;dbl&gt;, 4/12/20 &lt;dbl&gt;, 4/13/20 &lt;dbl&gt;,
+## #   4/14/20 &lt;dbl&gt;, 4/15/20 &lt;dbl&gt;, 4/16/20 &lt;dbl&gt;, 4/17/20 &lt;dbl&gt;, 4/18/20 &lt;dbl&gt;,
+## #   4/19/20 &lt;dbl&gt;, 4/20/20 &lt;dbl&gt;, 4/21/20 &lt;dbl&gt;, 4/22/20 &lt;dbl&gt;, 4/23/20 &lt;dbl&gt;,
+## #   4/24/20 &lt;dbl&gt;, 4/25/20 &lt;dbl&gt;, 4/26/20 &lt;dbl&gt;, 4/27/20 &lt;dbl&gt;, ...</code></pre>
+<p>Raw data in all four data sets have each data as column. Also there are some nulls values in Province/State column in global_cases and global_deaths data set. US Data set has additional columns e.g UID, iso2, iso3,code3 etc.</p>
+</div>
+<div id="cleaning-and-processing" class="section level2">
+<h2>Cleaning and Processing</h2>
+<div id="global-cases-and-deaths-data-set" class="section level3">
+<h3>Global Cases and Deaths Data Set</h3>
 <pre class="r"><code>global_cases&lt;-global_cases %&gt;% 
   pivot_longer(cols = -c(&#39;Province/State&#39;,&#39;Country/Region&#39;,Lat,Long),names_to=&quot;date&quot;,values_to=&quot;cases&quot;) %&gt;% select(-c(Lat,Long))
 global_deaths&lt;-global_deaths %&gt;% 
@@ -192,40 +347,41 @@ global &lt;- global_cases %&gt;% full_join(global_deaths) %&gt;% rename(Country_
 <pre><code>## Joining, by = c(&quot;Province/State&quot;, &quot;Country/Region&quot;, &quot;date&quot;)</code></pre>
 <pre class="r"><code>summary(global)</code></pre>
 <pre><code>##  Province_State     Country_Region          date                cases         
-##  Length:136344      Length:136344      Min.   :2020-01-22   Min.   :       0  
-##  Class :character   Class :character   1st Qu.:2020-05-24   1st Qu.:      87  
-##  Mode  :character   Mode  :character   Median :2020-09-24   Median :    1353  
-##                                        Mean   :2020-09-24   Mean   :  192535  
-##                                        3rd Qu.:2021-01-26   3rd Qu.:   28980  
-##                                        Max.   :2021-05-29   Max.   :33251939  
+##  Length:136620      Length:136620      Min.   :2020-01-22   Min.   :       0  
+##  Class :character   Class :character   1st Qu.:2020-05-24   1st Qu.:      88  
+##  Mode  :character   Mode  :character   Median :2020-09-25   Median :    1363  
+##                                        Mean   :2020-09-25   Mean   :  193393  
+##                                        3rd Qu.:2021-01-27   3rd Qu.:   29210  
+##                                        Max.   :2021-05-30   Max.   :33258664  
 ##      deaths      
 ##  Min.   :     0  
 ##  1st Qu.:     1  
-##  Median :    21  
-##  Mean   :  4577  
-##  3rd Qu.:   506  
-##  Max.   :594306</code></pre>
+##  Median :    22  
+##  Mean   :  4594  
+##  3rd Qu.:   509  
+##  Max.   :594430</code></pre>
 <pre class="r"><code>#Filter only cases which are positive
 global &lt;-global %&gt;% filter(cases &gt;0)
 summary(global)</code></pre>
 <pre><code>##  Province_State     Country_Region          date                cases         
-##  Length:122060      Length:122060      Min.   :2020-01-22   Min.   :       1  
+##  Length:122334      Length:122334      Min.   :2020-01-22   Min.   :       1  
 ##  Class :character   Class :character   1st Qu.:2020-06-24   1st Qu.:     255  
-##  Mode  :character   Mode  :character   Median :2020-10-17   Median :    2447  
-##                                        Mean   :2020-10-15   Mean   :  215066  
-##                                        3rd Qu.:2021-02-07   3rd Qu.:   42676  
-##                                        Max.   :2021-05-29   Max.   :33251939  
-##      deaths      
-##  Min.   :     0  
-##  1st Qu.:     2  
-##  Median :    44  
-##  Mean   :  5113  
-##  3rd Qu.:   726  
-##  Max.   :594306</code></pre>
+##  Mode  :character   Mode  :character   Median :2020-10-17   Median :    2459  
+##                                        Mean   :2020-10-15   Mean   :  215977  
+##                                        3rd Qu.:2021-02-08   3rd Qu.:   42889  
+##                                        Max.   :2021-05-30   Max.   :33258664  
+##      deaths        
+##  Min.   :     0.0  
+##  1st Qu.:     2.0  
+##  Median :    44.0  
+##  Mean   :  5130.5  
+##  3rd Qu.:   729.8  
+##  Max.   :594430.0</code></pre>
 <pre class="r"><code>US_cases&lt;-US_cases %&gt;%pivot_longer(cols=-(UID:Combined_Key),names_to=&quot;date&quot;,values_to=&quot;cases&quot;) %&gt;% select(Admin2:cases)%&gt;% mutate(date=mdy(date))%&gt;%select(-c(Lat,Long_))
 US_deaths&lt;-US_deaths %&gt;%pivot_longer(cols=-(UID:Population),names_to=&quot;date&quot;,values_to=&quot;deaths&quot;) %&gt;% select(Admin2:deaths)%&gt;% mutate(date=mdy(date))%&gt;%select(-c(Lat,Long_))
 US &lt;- US_cases %&gt;% full_join(US_deaths)</code></pre>
 <pre><code>## Joining, by = c(&quot;Admin2&quot;, &quot;Province_State&quot;, &quot;Country_Region&quot;, &quot;Combined_Key&quot;, &quot;date&quot;)</code></pre>
+</div>
 </div>
 
 
