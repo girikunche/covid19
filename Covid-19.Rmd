@@ -1,16 +1,16 @@
 ---
 title: "Final Project 2 -  Reproducible Report on COVID19 Data"
-author: "Giri Kunche"
-date: "5/20/2021"
-output: 
-  html_document: 
+date: "6/5/2021"
+output:
+  html_document:
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 ## Project Description
-COVID-19 or the Coronavirus is a disease caused by SARS-CoV-2 virus. The first known case was identified in Wuhan,China in Dec 2019. This disease is spread all over the world and is currently prevalent in almost
-all countries. 
+COVID-19 or the Coronavirus is a disease caused by SARS-CoV-2 virus. The first known case was identified in Wuhan,China in Dec 2019. This disease is spread all over the world and is currently prevalent in almost all countries. 
 
-As part of reproducible report, we will download and analyse COVID-19 data set published by Center for Systems Science and Engineering at John Hopkins University. The data is available at github site : https://github.com/CSSEGISandData/COVID-19
+As part of reproducible report, we will download and analyse COVID-19 data set.  There are several websites available for the data set. We will use data set published by Center for Systems Science and Engineering at John Hopkins University. The data is available at github site : https://github.com/CSSEGISandData/COVID-19
 
 ## Load Libraries
 Load tidyverse and lubridate libraries.
@@ -43,6 +43,7 @@ US_deaths<-read_csv(urls[4])
 ```
 
 ## Review Raw Data
+Let's get glimspe of data from global_cases, global_deaths, US_cases and US_deaths.
 
 ```{r raw_data,message=FALSE}
 head(global_cases)
@@ -56,6 +57,8 @@ Raw data in all four data sets have each data as column. Also there are some  nu
 ## Cleaning and Processing
 
 ### Global Cases and Deaths Data Set
+Both Global cases and Global death dataset has 'Province/State', 'Country/Region', 'Lat', 'Long' and data by dates. We will remove 'Lat' and 'Long' as we will not be using this for data analysis.
+Also we will move data columns to rows i.e we will have each date in separate rows using pivot_longer method. We will also join cases and death dataset into 'global' dataset.
 
 ```{r tidy_global_data}
 global_cases<-global_cases %>% 
@@ -65,16 +68,195 @@ global_deaths<-global_deaths %>%
 global <- global_cases %>% full_join(global_deaths) %>% rename(Country_Region ='Country/Region',Province_State ='Province/State') %>%
   mutate(date= mdy(date))
 
+```
+
+Below is the output of global dataset post tidying and joining global_cases and global_deaths datasets.
+
+```{r list_global_data}
+head(global)
+```
+
+Lets summarize the global dataset. We see the earliset case is on 22nd January 2020. Min cases and deaths is zero. There may be possibility of several records with zero cases/deaths.
+```{r summ1_global_data}
 summary(global)
+```
+
+We will filter null cases from global dataset, i.e we will consider only positive cases. Below is the summary after removing null cases. 
+```{r summ2_global_data}
 #Filter only cases which are positive
 global <-global %>% filter(cases >0)
 summary(global)
 ```
 
+
+
 ### US Cases and Deaths Data Set
+We will follow similar process for US Cases and Deaths dataset. We will clean data and join into 'US' dataset. This dataset has UID, iso2,iso3,code3,FIPS,Admin2,Province_State, Country_Regon, Lat,Long,
+Combined_Key and dates. Also date is a character instead of date object. US deaths has population data. We will combined these datasets into 'US' .
 
 ```{r tidy_us_data}
 US_cases<-US_cases %>%pivot_longer(cols=-(UID:Combined_Key),names_to="date",values_to="cases") %>% select(Admin2:cases)%>% mutate(date=mdy(date))%>%select(-c(Lat,Long_))
 US_deaths<-US_deaths %>%pivot_longer(cols=-(UID:Population),names_to="date",values_to="deaths") %>% select(Admin2:deaths)%>% mutate(date=mdy(date))%>%select(-c(Lat,Long_))
 US <- US_cases %>% full_join(US_deaths)
+head(US)
 ```
+
+###World Population Data
+We have US population data, but we dont have world population data in global dataset. This information is useful to comparative analysis between countries.
+Lets add population data and variable called combined_key into 'global' dataset. We will download global population data from https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
+from file UID_ISO_FIPS_LookUp_Table.csv. We will add population data to 'global' data set by joining based on Province_State and Country_Region.
+
+```{r global_pop_data}
+global<- global %>% unite("Combined_Key",c(Province_State,Country_Region),sep=", ",na.rm=TRUE,remove=FALSE)
+uid_lookup_url<-"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv"
+uid<-read_csv(uid_lookup_url) %>% select(-c(Lat,Long_,Combined_Key,code3,iso2,iso3,Admin2))
+global <- global %>% 
+  left_join(uid,by=c("Province_State","Country_Region")) %>% 
+  select(-c(UID,FIPS)) %>% 
+  select(Province_State,Country_Region,date,cases,deaths,Population,Combined_Key)
+```
+
+## Data Vizualization
+
+###Covid Cases, Deaths by US and by US States (New York and Alaska)
+Lets analyse data of United States as a whole and for a given state. We will first group the data by Province_State, Country_Region and date and summarize the data by number of cases,deaths and
+Population. We will compute covid-19 deaths per million and add under column 'deaths_per_mill'.
+
+```{r us_state_data}
+US_by_state <- US %>% group_by(Province_State,Country_Region,date) %>% 
+  summarise(cases=sum(cases),deaths=sum(deaths),Population=sum(Population)) %>%
+  mutate(deaths_per_mill =deaths*1000000/Population)%>%
+  select(Province_State,Country_Region,date,cases,deaths,deaths_per_mill,Population)%>%
+  ungroup()
+head(US_by_state)
+```
+
+Get the US total deaths by summarizing US_by_state data set. 
+
+```{r us_total_data}
+US_totals <- US_by_state %>% group_by(Country_Region,date) %>% 
+  summarise(cases=sum(cases),deaths=sum(deaths),Population=sum(Population)) %>% 
+  mutate(deaths_per_mill =deaths*1000000/Population) %>% 
+  select(Country_Region,date,cases,deaths,deaths_per_mill,Population)%>%
+  ungroup()
+head(US_totals)
+```
+
+Below visualization shows the cases and deaths trend in the United States from the start of the reporting of the COVID-19.
+
+```{r us_total_plot}
+US_totals%>%
+  filter(cases>0) %>%
+  ggplot(aes(x=date,y=cases))+
+  geom_line(aes(color="Cases"))+
+  geom_point(aes(color="Cases"))+
+  geom_line(aes(y=deaths,color="Deaths"))+
+  geom_point(aes(y=deaths,color="Deaths"))+
+  scale_y_log10()+
+  theme(legend.position = "bottom",axis.text.x=element_text(angle=90))+
+  labs(title="COVID-19 in United States",y=NULL)
+
+```
+
+Lets visualize cases, and deaths trend by state. We will analyse the trend in New York and Alaska.
+```{r us_state_plot}
+state1<-"New York"
+US_by_state%>%
+  filter(Province_State == state1) %>%
+  filter(cases>0) %>%
+  ggplot(aes(x=date,y=cases))+
+  geom_line(aes(color="Cases"))+
+  geom_point(aes(color="Cases"))+
+  geom_line(aes(y=deaths,color="Deaths"))+
+  geom_point(aes(y=deaths,color="Deaths"))+
+  scale_y_log10()+
+  theme(legend.position = "bottom",axis.text.x=element_text(angle=90))+
+  labs(title=str_c("COVID-19 in ",state1),y=NULL)
+
+state2<-"Alaska"
+US_by_state%>%
+  filter(Province_State == state2) %>%
+  filter(cases>0) %>%
+  ggplot(aes(x=date,y=cases))+
+  geom_line(aes(color="Cases"))+
+  geom_point(aes(color="Cases"))+
+  geom_line(aes(y=deaths,color="Deaths"))+
+  geom_point(aes(y=deaths,color="Deaths"))+
+  scale_y_log10()+
+  theme(legend.position = "bottom",axis.text.x=element_text(angle=90))+
+  labs(title=str_c("COVID-19 in ",state2),y=NULL)
+```
+
+The visualization for both US and states shows that the cases peaked initially and levelled off from Jan 2021 onwards. We will deep dive on the new cases and check if the cases 
+have really leveled off. In our data set we will add two column : new_cases and new_deaths. Below trend shows that the cases are dropping in both US and New York from Jan 2021 onwards.
+This may be due to Vaccinnation drive by both Federal and State goverments.
+
+```{r us_new_cases_plot,message=FALSE}
+US_by_state <- US_by_state %>% mutate(new_cases=cases-lag(cases),new_deaths=deaths-lag(deaths))
+US_totals <- US_totals %>% mutate(new_cases=cases-lag(cases),new_deaths=deaths-lag(deaths))
+
+US_totals%>%
+  ggplot(aes(x=date,y=new_cases))+
+  geom_line(aes(color="New Cases"))+
+  geom_point(aes(color="New Cases"))+
+  geom_line(aes(y=new_deaths,color="New Deaths"))+
+  geom_point(aes(y=new_deaths,color="New Deaths"))+
+  scale_y_log10()+
+  theme(legend.position = "bottom",axis.text.x=element_text(angle=90))+
+  labs(title="COVID-19 in United States",y=NULL)
+
+```
+
+```{r us_state_new_cases_plot,message=FALSE}
+state1<-"New York"
+US_by_state%>%
+  filter(Province_State == state1) %>%
+  ggplot(aes(x=date,y=new_cases))+
+  geom_line(aes(color="New Cases"))+
+  geom_point(aes(color="New Cases"))+
+  geom_line(aes(y=new_deaths,color="New Deaths"))+
+  geom_point(aes(y=new_deaths,color="New Deaths"))+
+  scale_y_log10()+
+  theme(legend.position = "bottom",axis.text.x=element_text(angle=90))+
+  labs(title=str_c("COVID-19 in ",state1),y=NULL)
+```
+
+Which are the top 10 states with low cases and deaths? Lets compute cases and deaths per thousands by each state. We will filter out data where the cases and population is zero.
+
+```{r us_state_low_cases_plot,message=FALSE}
+US_state_totals <-US_by_state %>%
+  group_by(Province_State) %>%
+  summarise(deaths=max(deaths),cases=max(cases),
+            population=max(Population),
+            cases_per_thou=1000*cases/population,
+            deaths_per_thou=1000*deaths/population) %>%
+  filter(cases >0, population>0)
+US_state_totals %>%slice_min(deaths_per_thou,n=10)
+```
+Above 10 states have the lowest cases and deaths per thousand rates.  Which are the worst cases? We can see New Jersey and New York are among the higest cases and deaths per thousands.
+
+```{r us_state_worst_cases_plot,message=FALSE}
+US_state_totals %>%slice_max(deaths_per_thou,n=10)
+```
+
+## Modelling
+We will use linear model and understand the relationship between deaths and number of cases. We will look at deaths per thousands as function of cases per thousand. After creating linear model , we will
+add pred column to US State Totals dataset. 'Pred' is the predicted value based on the linear model.
+
+```{r us_state_model,message=FALSE}
+mod<-lm(deaths_per_thou~cases_per_thou,data=US_state_totals)
+US_tot_w_pred<-US_state_totals%>% mutate(pred=predict(mod))
+head(US_tot_w_pred)
+```
+
+Now lets plot based on the actual and predicted values to see how well the model is doing. Red is our prediciton and blue dots are actual values. THe model seems to be doing ok, but there are some outliers.
+
+```{r us_state_pred_model,message=FALSE}
+US_tot_w_pred%>%ggplot()+geom_point(aes(x=cases_per_thou,y=deaths_per_thou),color="blue")+geom_point(aes(x=cases_per_thou,y=pred),color="red")
+```
+
+
+## Analysis of Bias
+Covid-19 data is collected from various sources. Counting exact number of cases is difficult as the data is collected from government agencies, private hospitals, Non-governmental agencies.
+There is also time lag in the collection of data because covid causes some mild illness in people and it takes some time for symptoms to appear. Also not everyone who gets infected gets tested.
+Again this depends on countries, states, provinces. 
